@@ -231,7 +231,6 @@ app.post('/post-case', function(req, res, next){
          response.message = msg;
          case_info = {"case": req.body}
          response.data = case_info;
-         response.data = req.body;
          res.send(response.status, response);
          next();
       }
@@ -253,7 +252,35 @@ app.get('/get-cases', function(req, res, next){
       else{
          console.log("result : ", result);
          if(result.length>0){
-            msg = 'case list';
+            msg = 'case list found';
+            response.message = msg;
+            response.data = {"cases":result};
+         }
+         else{
+            msg = 'no list found';
+            response.message = msg;
+         }
+         res.send(response.status, response);
+         next();
+      }
+    });
+});
+
+// get case by user api
+app.get('/get-cases-by-userid', function(req, res, next){
+   let response = {status: 200,  message: "", data: {}};
+   var sql = "SELECT * FROM `case` where filed_by=?";
+     con.query(sql, req.query.filed_by, function (err, result) {
+      if (err) {
+         msg = err;
+         response.message = msg.sqlMessage;
+         res.send(response.status, response);
+         next();
+      }
+      else{
+         console.log("result : ", result);
+         if(result.length>0){
+            msg = 'case list found';
             response.message = msg;
             response.data = {"cases":result};
          }
@@ -281,7 +308,7 @@ app.get('/get-officers', function(req, res, next){
       else{
          console.log("result : ", result);
          if(result.length>0){
-            msg = 'officers list';
+            msg = 'officers list found';
             response.message = msg;
             response.data = {"officers":result};
          }
@@ -330,6 +357,34 @@ app.post('/assign-officer', function(req, res, next){
       }
     });
    } 
+});
+
+// get case assigned to officer
+app.get('/get-assigned-cases-to-officer', function(req, res, next){
+   let response = {status: 200,  message: "", data: {}};
+   var sql = "SELECT * FROM `case` where assigned_to=?";
+     con.query(sql, req.query.assigned_to, function (err, result) {
+      if (err) {
+         msg = err;
+         response.message = msg.sqlMessage;
+         res.send(response.status, response);
+         next();
+      }
+      else{
+         console.log("result : ", result);
+         if(result.length>0){
+            msg = 'case list found';
+            response.message = msg;
+            response.data = {"cases":result};
+         }
+         else{
+            msg = 'no list found';
+            response.message = msg;
+         }
+         res.send(response.status, response);
+         next();
+      }
+    });
 });
 
 // get criminal suggestion
