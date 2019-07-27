@@ -391,8 +391,8 @@ app.get('/get-assigned-cases-to-officer', function(req, res, next){
 app.get('/get-criminal-prediction', function(req, res, next){
    let response = {status: 200,  message: "", data: {}};
    console.log("case id = ", req.query.case_id);
-   let sql = "SELECT * FROM `case` WHERE case_id=?";
-   con.query(sql, req.query.case_id, function (err, result1) {
+   let sql = "SELECT case_management_db.criminal.criminal_id, case_management_db.criminal.criminal_name, case_management_db.criminal.age, case_management_db.criminal.sex, case_management_db.criminal.race, case_management_db.criminal.division, case_management_db.criminal.male_victim, case_management_db.criminal.female_victim, case_management_db.criminal.area FROM case_management_db.criminal INNER JOIN case_management_db.`case` ON (case_management_db.criminal.area=case_management_db.`case`.area && case_management_db.criminal.race=case_management_db.`case`.suspect_race && case_management_db.criminal.division=case_management_db.`case`.division && case_management_db.criminal.sex=case_management_db.`case`.suspect_sex && case_management_db.criminal.crime_type=case_management_db.`case`.case_type && case_management_db.criminal.method=case_management_db.`case`.used_method && case_management_db.`case`.case_id=?);";
+   con.query(sql, req.query.case_id, function (err, result) {
       if (err) {
          msg = err;
          response.message = msg.sqlMessage;
@@ -400,31 +400,18 @@ app.get('/get-criminal-prediction', function(req, res, next){
          next();
       }
       else{
-         console.log("result : ", result1);
-         var sql = "SELECT * FROM `criminal` WHERE sex=? AND race=? AND crime_type=? AND division=? AND area=? AND method=?";
-         con.query(sql, [result1.suspect_sex, result1.suspect_race, result1.case_type, result1.division, result1.area, result1.used_method], function (err, result2) {
-            if (err) {
-               msg = err;
-               response.message = msg.sqlMessage;
-               res.send(response.status, response);
-               next();
+            console.log("result : ", result);
+            if(result.length>0){
+               msg = 'suspected criminals list found';
+               response.message = msg;
+               response.data = {"criminals": result};
             }
             else{
-               let result = Object.values(JSON.parse(JSON.stringify(result2)))
-               console.log("result : ", result);
-               if(result.length>0){
-                  msg = 'suspected criminals list';
-                  response.message = msg;
-                  response.data = {"criminals": result};
-               }
-               else{
-                  msg = 'no list found';
-                  response.message = msg;
-               }
-               res.send(response.status, response);
-               next();
+               msg = 'no list found';
+               response.message = msg;
             }
-         });  
+            res.send(response.status, response);
+            next();
       }
     });
 });
